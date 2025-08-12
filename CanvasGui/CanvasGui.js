@@ -1,7 +1,8 @@
-let canvas = document.getElementById('Canvas');
-let ctx = canvas.getContext('2d');
+canvas = document.getElementById('canvas');
+ctx = canvas.getContext('2d');
 
 const GuiCreator = {
+    clear_canvas : true,
     frame:  class {
         constructor(x,y,width,height,clickable,name,color){
             this.height = height;
@@ -46,6 +47,29 @@ const GuiCreator = {
             this.color = color;
         }
     },
+    clickMethods : {
+        FrameBackground:{
+            click(){
+                alert('you clicked a frame background')
+            }
+        },
+        yesButton:{
+            click(){
+                const customEvent = new CustomEvent('buttonClicked', {
+                    detail: {ButtonClicked:"Clicked the Yes Button"}
+                });
+                document.dispatchEvent(customEvent);
+            }
+        },
+        noButton:{
+            click(){  
+                const customEvent = new CustomEvent('buttonClicked', {
+                    detail: {ButtonClicked:"Clicked the NO Button"}
+                });  
+                document.dispatchEvent(customEvent);
+            }
+        },
+    },
 
     rect : canvas.getBoundingClientRect(),
     buttonList : {},
@@ -59,29 +83,33 @@ const GuiCreator = {
        let mouseY = Ey - this.rect.top;
 
        let Clicked = this.checkCollision(mouseX,mouseY)
-       if (Clicked == true){
-         console.log('clicked a button')
+       if (Clicked.clicked == true){
+         if(this.clickMethods[Clicked.buttonName] && this.clickMethods[Clicked.buttonName].click){
+            this.clickMethods[Clicked.buttonName].click()
+         }
        }
 
        let ChildClicked = this.checkChildCollison(mouseX,mouseY)
-       if (ChildClicked == true){
-         console.log('clicked a child button')
+       if (ChildClicked.clicked == true){
+         if(this.clickMethods[ChildClicked.buttonName] && this.clickMethods[ChildClicked.buttonName].click){
+            this.clickMethods[ChildClicked.buttonName].click()
+         }
        }
     },
     checkCollision:function(mouseX,mouseY) {
-        let collided = false;
+        let collided = {"clicked":false,"buttonName":null};
         Object.keys(this.buttonList).forEach(key =>{
             let UiObj = this.buttonList[key];
             if (mouseX >= UiObj.x && mouseX <= UiObj.width + UiObj.x && mouseY >= UiObj.y && mouseY <= UiObj.height + UiObj.y){
                 if(UiObj.clickable){
-                    collided = true;
+                    collided = {"clicked":true,"buttonName":UiObj.name};
                 }
             }
         })
         return collided
     },
     checkChildCollison:function(mouseX,mouseY){
-        let collided = false;
+        let collided = {"clicked":false,"buttonName":null};
         Object.keys(this.buttonList).forEach(key =>{
             let UiObj = this.buttonList[key];
             if(UiObj.children){
@@ -89,7 +117,7 @@ const GuiCreator = {
                     let child = UiObj.children[key]
                     if(mouseX >= child.x && mouseX <= child.width + child.x && mouseY >= child.y && mouseY <= child.height + child.y){
                         if(child.clickable){
-                            collided = true
+                            collided = {"clicked":true,"buttonName":child.name};
                         }
                     }
                 });
@@ -103,8 +131,10 @@ const GuiCreator = {
         ctx.fillRect(x,y,width,height);
     },
     drawloop: function(){
-        ctx.clearRect(0,0,1000,1000);
-        this.drawText("are you sure u wanna buy this bro");
+        if(this.clear_canvas == true){
+            ctx.clearRect(0,0,1000,1000);
+        }
+        this.drawText("testing text",100,100);
         Object.keys(this.buttonList).forEach(key => {
             let toDraw = this.buttonList[key]; 
             this.drawBox(toDraw.x,toDraw.y,toDraw.color,toDraw.width,toDraw.height);
@@ -139,9 +169,10 @@ const GuiCreator = {
             });
         }
     },
-    drawText:function(txt){
-        ctx.fillStyle = "#009578"
-        ctx.fillText(txt,100,100);
+    drawText:function(txt,x,y){
+        ctx.font = "30px serif";
+        ctx.fillStyle = "#009578";
+        ctx.strokeText(txt, x, y,500);
     }
     
         
@@ -183,3 +214,7 @@ canvas.addEventListener('click', (event) => {
     GuiCreator.handleClick(event.x,event.y)
 })
 
+//testing purposes 
+document.addEventListener('buttonClicked', (event) => {
+  console.log(event.detail.ButtonClicked);
+});
