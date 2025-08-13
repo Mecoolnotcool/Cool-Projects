@@ -47,16 +47,23 @@ export const GuiCreator = {
             this.color = color;
         }
     },
-    clickMethods : {
-        
-    },
+    clickMethods : {},
+    UiTypes : [
+        "buttonObject",
+        "text"
+    ],
+
 
     rect : canvas.getBoundingClientRect(),
     buttonList : {},
+    text : {},
 
     //methods 
-    addObject:function(obj,name){
-       this.buttonList[name] = obj;
+    addObject:function(obj,name,type){
+        if(type && this.UiTypes.includes(type)){
+           let NewElement = this.buttonList[name] = obj;
+            NewElement['type'] = type
+        }
     },
     handleClick:function(Ex,Ey) {
        let mouseX = Ex - this.rect.left;
@@ -166,4 +173,4 @@ export const GuiCreator = {
         ctx.fillStyle = "#009578";
         ctx.strokeText(txt, x, y,500);
     },
-};
+};       
