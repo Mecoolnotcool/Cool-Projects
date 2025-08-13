@@ -1,7 +1,7 @@
-canvas = document.getElementById('canvas');
-ctx = canvas.getContext('2d');
+export let canvas = document.getElementById('canvas');
+export let ctx = canvas.getContext('2d');
 
-const GuiCreator = {
+export const GuiCreator = {
     clear_canvas : true,
     frame:  class {
         constructor(x,y,width,height,clickable,name,color){
@@ -48,27 +48,7 @@ const GuiCreator = {
         }
     },
     clickMethods : {
-        FrameBackground:{
-            click(){
-                alert('you clicked a frame background')
-            }
-        },
-        yesButton:{
-            click(){
-                const customEvent = new CustomEvent('buttonClicked', {
-                    detail: {ButtonClicked:"Clicked the Yes Button"}
-                });
-                document.dispatchEvent(customEvent);
-            }
-        },
-        noButton:{
-            click(){  
-                const customEvent = new CustomEvent('buttonClicked', {
-                    detail: {ButtonClicked:"Clicked the NO Button"}
-                });  
-                document.dispatchEvent(customEvent);
-            }
-        },
+        
     },
 
     rect : canvas.getBoundingClientRect(),
@@ -143,7 +123,7 @@ const GuiCreator = {
         requestAnimationFrame(this.drawloop.bind(this));
     },  
     //this automatically creates offsets for your ui elements
-    createOffsets(parent){
+    createOffsets:function(parent){
         let finalOffsets = {};
         if(parent.children){
             Object.keys(parent.children).forEach(key =>{
@@ -169,52 +149,21 @@ const GuiCreator = {
             });
         }
     },
+    //automatically creates a button click event
+    //can be done manually
+    createButtonEvent:function(buttonName,EventName){
+        this.clickMethods[buttonName] =  {
+            click:function(){
+                const customEvent = new CustomEvent(EventName, {
+                    detail: { ButtonClicked: "Clicked" }
+                });
+                document.dispatchEvent(customEvent);
+            }
+        }
+    },
     drawText:function(txt,x,y){
         ctx.font = "30px serif";
         ctx.fillStyle = "#009578";
         ctx.strokeText(txt, x, y,500);
-    }
-    
-        
-}
-
-
-let buttons = {}
-
-//create a basic re-usable yes or no button
-const YesOrNoButton = {
-    createThisButton:function(name,UiX,UiY){
-        let frame = new GuiCreator.frame(0,0,200,200,false,"FrameBackground",'blue');
-        let yesButton = new GuiCreator.buttonBase(30,150,40,40,true,"yesButton",'green');
-        let noButton = new GuiCreator.buttonBase(130,150,40,40,true,"noButton",'red');
-
-        frame.addChild(yesButton,yesButton.name);
-        frame.addChild(noButton,noButton.name);
-        frame.offsets = GuiCreator.createOffsets(frame);
-
-        GuiCreator.addObject(frame,name);
-        GuiCreator.setInitalPosition(frame,UiX,UiY);
-        
-    }
-}
-//creating it
-YesOrNoButton.createThisButton("ConfirmBuyButton2",300,300);
-
-//clickable frame
-let frame = new GuiCreator.frame(0,500,200,200,true,"FrameBackground",'blue')
-GuiCreator.addObject(frame,'clickableFrame');
-
-
-GuiCreator.drawText()
-
-
-//setup the game loop and click detection
-requestAnimationFrame(() => GuiCreator.drawloop());
-canvas.addEventListener('click', (event) => {
-    GuiCreator.handleClick(event.x,event.y)
-})
-
-//testing purposes 
-document.addEventListener('buttonClicked', (event) => {
-  console.log(event.detail.ButtonClicked);
-});
+    },
+};
