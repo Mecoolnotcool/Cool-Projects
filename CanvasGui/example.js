@@ -14,7 +14,7 @@ const YesOrNoButton = {
         GuiCreator.createButtonEvent('yesButton','yesButtonClicked');
         GuiCreator.createButtonEvent('noButton','noButtonClicked');
 
-        GuiCreator.addObject(frame,name);
+        GuiCreator.addObject(frame,name,'buttonObject');
         GuiCreator.setInitalPosition(frame,UiX,UiY);
         
     }
@@ -23,14 +23,9 @@ const YesOrNoButton = {
 YesOrNoButton.createThisButton("ConfirmBuyButton2",300,300);
 
 //clickable frame
-let frame = new GuiCreator.frame(0,500,200,200,true,"FrameBackground",'blue')
-GuiCreator.addObject(frame,'clickableFrame');
-
-
-GuiCreator.drawText()
-
-console.log(GuiCreator.clickMethods)
-
+let frame = new GuiCreator.frame(0,500,200,200,true,"clickableFrame",'blue')
+GuiCreator.addObject(frame,'clickableFrame','buttonObject');
+GuiCreator.createButtonEvent('clickableFrame','FrameBackgroundClicked');
 
 //setup the game loop and click detection
 requestAnimationFrame(() => GuiCreator.drawloop());
@@ -47,3 +42,9 @@ document.addEventListener('noButtonClicked', (event) => {
     console.log(event.detail.ButtonClicked);
     //add logic here (the console.log can be removed)
 });
+document.addEventListener('FrameBackgroundClicked', (event) => {
+    console.log(event.detail.ButtonClicked);
+    //add logic here (the console.log can be removed)
+});
+
+
