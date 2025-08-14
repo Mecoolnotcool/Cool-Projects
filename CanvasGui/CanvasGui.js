@@ -1,5 +1,8 @@
-export let canvas = document.getElementById('canvas');
-export let ctx = canvas.getContext('2d');
+let canvasId = "canvas";
+
+
+export const canvas = document.getElementById(canvasId);
+export const ctx = canvas.getContext('2d');
 
 export const GuiCreator = {
     clear_canvas : true,
@@ -33,7 +36,6 @@ export const GuiCreator = {
             })
         }
     },
-
     buttonBase: class {
         constructor(x,y,width,height,clickable,name,color){
             this.height = height;
@@ -47,22 +49,40 @@ export const GuiCreator = {
             this.color = color;
         }
     },
+    textUi: class {
+        constructor(x,y,text,fontSize,maxGivenWidth,name){
+            this.x = x;
+            this.y = y;
+            this.text = text;
+            this.fontSize = fontSize;
+            this.maxGivenWidth = maxGivenWidth;
+            this.name = name;
+            this.words 
+            this.lines = {}
+        }
+        //automatically called on object creation for drawing purposes
+        splitText() {
+            let splitTextArray = this.text.split(" ");
+            this.words = splitTextArray;
+        }
+    },
+
     clickMethods : {},
-    UiTypes : [
-        "buttonObject",
-        "text"
-    ],
-
-
+    
     rect : canvas.getBoundingClientRect(),
     buttonList : {},
     text : {},
 
     //methods 
     addObject:function(obj,name,type){
-        if(type && this.UiTypes.includes(type)){
-           let NewElement = this.buttonList[name] = obj;
-            NewElement['type'] = type
+        if(type == null || type == undefined) {
+            console.error('No button type. Cannot add the object to the ui list') 
+            return
+        }
+        obj['type'] = type;
+        let NewElement = this.buttonList[name] = obj;
+        if(NewElement.type == "text"){
+            NewElement.splitText();
         }
     },
     handleClick:function(Ex,Ey) {
@@ -111,24 +131,82 @@ export const GuiCreator = {
             }
             
         })
-        return collided
+        return collided;
     },
     drawBox: function(x,y,color,width,height){
         ctx.fillStyle = color;
         ctx.fillRect(x,y,width,height);
     },
+    //includes text wrapping
+    drawText:function(obj){
+        //apparently this saves fps or something according to a stack overflow dude
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext("2d");
+
+        ctx.font = "30px Arial";
+        //create lines 
+        let lineWidth = 0;
+        let currentLine = "";
+        obj.lines = [];
+        let x = obj.x;
+        let y = obj.y;
+
+        for(let i = 0; i< obj.words.length; i++){
+            let measurements = ctx.measureText(obj.words[i] + " ");
+            let Textwidth = Math.floor(measurements.width)
+
+            if(lineWidth + Textwidth < obj.maxGivenWidth){
+                currentLine = currentLine + " " + obj.words[i];
+                lineWidth += Textwidth;
+
+            } else {
+                currentLine.trim();
+                obj.lines.push({"text":currentLine,x,y});
+                currentLine = "";
+                lineWidth = 0;
+                x = x;
+                y += 30
+
+                //push the current word into the new line
+                currentLine = obj.words[i];
+                lineWidth += Textwidth;
+            }
+            
+        }
+        // TODO: fix this 
+        //last word isn't added to the lines array
+
+        //draw lines
+        for(let i = 0; i< obj.lines.length; i++){
+            ctx.fillStyle = "white";
+            let text = obj.lines[i].text
+            ctx.fillText(text, obj.lines[i].x,obj.lines[i].y) ;
+        }
+    },
+    drawAll:function(){
+        Object.keys(this.buttonList).forEach(key => {
+            let toDraw = this.buttonList[key]; 
+            if(toDraw.name != undefined && toDraw.type == "buttonObjectBox"){
+                this.drawBox(toDraw.x,toDraw.y,toDraw.color,toDraw.width,toDraw.height);
+                toDraw.drawChildren();
+            }
+            if(toDraw.name != undefined && toDraw.type == "text"){
+                let toDraw = this.buttonList[key];
+                this.drawText(toDraw)
+            }
+
+        });
+    },
+
     drawloop: function(){
         if(this.clear_canvas == true){
             ctx.clearRect(0,0,1000,1000);
         }
-        this.drawText("testing text",100,100);
-        Object.keys(this.buttonList).forEach(key => {
-            let toDraw = this.buttonList[key]; 
-            this.drawBox(toDraw.x,toDraw.y,toDraw.color,toDraw.width,toDraw.height);
-            toDraw.drawChildren()
-        });
+        this.drawAll();
+
         requestAnimationFrame(this.drawloop.bind(this));
     },  
+
     //this automatically creates offsets for your ui elements
     createOffsets:function(parent){
         let finalOffsets = {};
@@ -168,9 +246,5 @@ export const GuiCreator = {
             }
         }
     },
-    drawText:function(txt,x,y){
-        ctx.font = "30px serif";
-        ctx.fillStyle = "#009578";
-        ctx.strokeText(txt, x, y,500);
-    },
 };       
+
