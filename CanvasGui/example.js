@@ -1,4 +1,4 @@
-import { GuiCreator, canvas } from './CanvasGui.js';
+import { GuiCreator, canvas } from './canvasGui/CanvasGui.js';
 
 //create a basic re-usable yes or no button
 const YesOrNoButton = {
@@ -14,17 +14,17 @@ const YesOrNoButton = {
         GuiCreator.createButtonEvent('yesButton','yesButtonClicked');
         GuiCreator.createButtonEvent('noButton','noButtonClicked');
 
-        GuiCreator.addObject(frame,name,'buttonObject');
+        GuiCreator.addObject(frame,name,'buttonObjectBox');
         GuiCreator.setInitalPosition(frame,UiX,UiY);
         
     }
-}
+};
 //creating it
 YesOrNoButton.createThisButton("ConfirmBuyButton2",300,300);
 
 //clickable frame
 let frame = new GuiCreator.frame(0,500,200,200,true,"clickableFrame",'blue')
-GuiCreator.addObject(frame,'clickableFrame','buttonObject');
+GuiCreator.addObject(frame,'clickableFrame',"buttonObjectBox");
 GuiCreator.createButtonEvent('clickableFrame','FrameBackgroundClicked');
 
 //setup the game loop and click detection
@@ -47,4 +47,5 @@ document.addEventListener('FrameBackgroundClicked', (event) => {
     //add logic here (the console.log can be removed)
 });
 
-
+let textObj = new GuiCreator.textUi(300,325,"Are you sure you want to click the green button? If so beware.....",30,200,"textObj");
+GuiCreator.addObject(textObj,"textObj","text");
